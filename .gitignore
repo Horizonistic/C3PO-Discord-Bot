@@ -3,4 +3,5 @@ c3po_quotes
 *.users
 *.urlmonitor
 *.shiftmonitor
+data
 __pycache__
