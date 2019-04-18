@@ -20,12 +20,12 @@ class Other(commands.Cog):
     #     await ctx.send(util.get_random_from_file(c3po_quotes_filename))
 
     @commands.command(description='For when you wanna settle the score some other way')
-    async def choose(ctx, *choices: str):
+    async def choose(self, ctx, *choices: str):
         """Chooses from a list"""
         await ctx.send(random.choice(choices))
 
     @commands.command(description='Rolls a totally fair and random dice in the NdN format.  For example, 2d20 rolls two d20 dice and returns the results.  Guaranteed cryptographically-secure randomness')
-    async def roll(ctx,dice : str):
+    async def roll(self, ctx,dice : str):
         """Rolls a dice in NdN format."""
         try:
             rolls, limit = map(int, dice.split('d'))
@@ -37,7 +37,7 @@ class Other(commands.Cog):
         await ctx.send(result)
 
     @commands.command(pass_context=True, description='When you just really really have to know')
-    async def check(ctx, *user : str):
+    async def check(self, ctx, *user : str):
         """For when you're really curious"""
         # If no user passed
         if len(user) is 0:

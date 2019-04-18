@@ -39,7 +39,6 @@ def get_data_file(server_id: str, extension: FileExtensions):
 # This is a weird function that's not _entirely_ necessary but I like it
 # It's like I'm planning for something bigger than this actually is
 def build_file_path(server_id: str, extension: FileExtensions):
-    print(data_files_folder + '/' + server_id + '/' + extension)
     return data_files_folder + '/' + server_id + '/' + extension
 
 # Returns True/False whether passed filename exists or not

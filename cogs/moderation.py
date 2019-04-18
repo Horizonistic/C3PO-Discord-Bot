@@ -1,7 +1,9 @@
 import discord
 from discord.ext import commands
 
+import validators
 import random
+import re
 
 # File extension enums
 from utilities import FileExtensions as ext
@@ -15,10 +17,19 @@ class Moderation(commands.Cog):
         self.bot = bot
 
     # Deletes posts in specified channel that are just URLs
-    async def on_message(message):
+    @commands.Cog.listener()
+    async def on_message(self, message):
         # This is interesting because I have to read through one file for each extension type for every single message
         # This seems inefficient so on_ready() should have something to load them into memory
+        # If I switch over to a database instead of files this won't really be a problem
         # That's doesn't seem scalable, but why am I caring about scalability??
+
+        # Make sure it's not running against its own messages, AND it's in a guild text channel
+        if not isinstance(message.channel, discord.channel.TextChannel):
+            return
+
+        if message.author == message.guild.me:
+            return
         
         # Iterate over all extensions to check all files for the channel ID that the message was just sent in
         for key, value in ext.__members__.items():
@@ -28,17 +39,30 @@ class Moderation(commands.Cog):
                 with open(filename, 'r') as file:
                     lines = file.read().splitlines()
 
+                # If channel is being moderated
                 if str(message.channel.id) in lines:
+                    # URL detection
                     if value is ext.URL_CHANNELS:
-                        print("yes")
+                        if not validators.url(message.content):
+                            pm_content = "Your message _\"{0}\"_ was removed from the channel _{1}_ because it wasn't just a URL.".format(message.content, message.channel.name)
+                            await message.delete()
+                            await message.author.send(content=pm_content)
 
+                    # Shift code detection
                     if value is ext.SHIFT_CHANNELS:
-                        print("yes2")
-                    # Check against message type for each moderation type
-
-        await bot.process_commands(message)
+                        regex = re.compile('^([a-zA-Z0-9]{5}-){4}[a-zA-Z0-9]{5}$')
+                        message_lines = message.content.splitlines()
+                        # Iterate over all lines of message
+                        for line in message_lines:
+                            if not regex.match(line.strip()):
+                                print(line)
+                                # Invalid shift code!
+                                pm_content = "Your message _\"{0}\"_ was removed from the channel _{1}_ because it contained one or more invalid shift code.".format(message.content, message.channel.name)
+                                await message.delete()
+                                await message.author.send(content=pm_content)
 
     @commands.command(pass_context=True,description='Lists all names added')
+    @commands.has_permissions(manage_messages=True)
     async def moderate(self, ctx, type_str: str):
         """Adds channel to moderation list"""
         # Basically a switch statement for getting the enum based on argument passed
@@ -62,13 +86,16 @@ class Moderation(commands.Cog):
         if channel not in lines:
             with open(filename, 'a') as file:
                 file.write(channel + '\n')
-                await util.send_with_quote(ctx, "Now monitoring this channel")
+                ctx.message.delete()
+                pm_content = "Now monitoring _{0}_ on server _{1}_ for _{2}_".format(ctx.channel.name, ctx.guild.name, type_str)
+                await ctx.author.send(content=pm_content)
         else:
             for i, line in enumerate(lines[:]):
                 line = line.rstrip('\n')
                 if line == channel:
                     del lines[i]
-                    await util.send_with_quote(ctx, "No longer monitoring this channel")
+                    pm_content = "No longer monitoring _{0}_ on server _{1}_ for _{2}_.  Your command will still be deleted.".format(ctx.channel.name, ctx.guild.name, type_str)
+                    await ctx.author.send(content=pm_content)
             open(filename, 'w').writelines(lines)
 
 def setup(bot):

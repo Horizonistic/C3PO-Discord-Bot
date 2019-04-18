@@ -16,10 +16,10 @@ bot.load_extension("cogs.moderation")
 bot.load_extension("cogs.random_selection")
 bot.load_extension("cogs.other")
 
-# todo: figure out where the events should go
-# todo: make a list of cog names (e.g. "cogs.randomselection") to !reloadall easily
+# todo: make a way to check if channel is moderated
 # todo: regex for channel moderations
-# todo: use databases instead of files to save settings
+# todo: make a list of cog names (e.g. "cogs.randomselection") to !reloadall easily
+# todo: use databases instead of files to save settings (maybe in the future)
 
 ######
 # Events
