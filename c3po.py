@@ -135,13 +135,11 @@ async def show(ctx):
 #         print("not in")
 
 
-
-
 ######
 # Other commands
 ######
 @bot.command(pass_context=True,description='For when you really need that bit of robot in your life')
-async def quote():
+async def quote(ctx):
     """Says a quote"""
     await ctx.send(get_random_from_file(c3po_quotes_filename))
 
@@ -151,7 +149,7 @@ async def choose(ctx, *choices: str):
     await ctx.send(random.choice(choices))
 
 @bot.command(description='Rolls a totally fair and random dice in the NdN format.  For example, 2d20 rolls two d20 dice and returns the results.  Guaranteed cryptographically-secure randomness')
-async def roll(dice : str):
+async def roll(ctx,dice : str):
     """Rolls a dice in NdN format."""
     try:
         rolls, limit = map(int, dice.split('d'))
@@ -167,16 +165,16 @@ async def check(ctx, *user : str):
     """For when you're really curious"""
     # If no user passed
     if len(user) is 0:
-        if ctx.message.author.top_role.name == ctx.message.server.role_hierarchy[0].name:
+        if ctx.message.author.top_role.name == ctx.guild.roles[len(ctx.guild.roles) - 1].name:
             await ctx.send("You are indeed gay.\n" + get_random_from_file(c3po_quotes_filename))
         else:
             await ctx.send("You are not gay.\n" + get_random_from_file(c3po_quotes_filename))
     # If user passed
     else:
         user = ' '.join(user)
-        member = ctx.message.server.get_member_named(user)
+        member = ctx.guild.get_member_named(user)
         if member is not None:
-            if member.top_role.name == ctx.message.server.role_hierarchy[0].name:
+            if member.top_role.name == ctx.guild.roles[len(ctx.guild.roles) - 1].name:
                 await ctx.send(member.mention + " is indeed gay.\n" + get_random_from_file(c3po_quotes_filename))
             else:
                 await ctx.send(member.mention + " is not gay.\n" + get_random_from_file(c3po_quotes_filename))
@@ -191,7 +189,7 @@ async def check(ctx, *user : str):
 def get_random_from_file(filename: str):
     lines = open(filename, 'r').readlines()
     secure_random = random.SystemRandom()
-    return secure_random.choice(lines)
+    return (secure_random.choice(lines)).rstrip('\n')
 
 # Returns filename to save added roll names, check for file and creates if it doesn't exist
 def get_data_file(server_id: str, extension: ext):
