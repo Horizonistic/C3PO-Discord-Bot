@@ -1,4 +1,6 @@
 botinfo.py
 c3po_quotes
 *.users
+*.urlmonitor
+*.shiftmonitor
 __pycache__
