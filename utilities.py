@@ -1,8 +1,11 @@
 from discord.ext import commands
 import random
 from enum import Enum
+import os
+import os.path
 
-c3po_quotes_filename = 'c3po_quotes'
+c3po_quotes_filename = "c3po_quotes"
+data_files_folder = "data"
 
 class FileExtensions(Enum):
     ROLLS = "users"
@@ -26,7 +29,7 @@ def get_random_from_file(filename: str):
 
 # Returns filename to save added roll names, check for file and creates if it doesn't exist
 def get_data_file(server_id: str, extension: FileExtensions):
-    filename = build_filename(server_id, extension)
+    filename = build_file_path(server_id, extension)
 
     if not does_file_exist(filename):
         create_file(filename)
@@ -35,11 +38,15 @@ def get_data_file(server_id: str, extension: FileExtensions):
 
 # This is a weird function that's not _entirely_ necessary but I like it
 # It's like I'm planning for something bigger than this actually is
-def build_filename(server_id: str, extension: FileExtensions):
-    return server_id + '.' + extension
+def build_file_path(server_id: str, extension: FileExtensions):
+    print(data_files_folder + '/' + server_id + '/' + extension)
+    return data_files_folder + '/' + server_id + '/' + extension
 
 # Returns True/False whether passed filename exists or not
 def does_file_exist(filename: str):
+    if not os.path.exists(filename):
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+
     try:
         file = open(filename, 'r')
         return True

@@ -10,7 +10,7 @@ import utilities as util
 ######
 # Other commands
 ######
-class Moderation(commands.Cog):
+class Other(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -56,3 +56,6 @@ class Moderation(commands.Cog):
                     await util.send_with_quote(ctx, member.mention + " is not gay.")
             else:
                 await util.send_with_quote(ctx, "That user doesn't exist.")
+
+def setup(bot):
+    bot.add_cog(Other(bot))
