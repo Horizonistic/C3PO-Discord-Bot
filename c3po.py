@@ -1,19 +1,31 @@
 import discord
 from discord.ext import commands
 import random
+import requests
+
+from file_extensions import FileExtensions as ext
 
 loot_rolls_suffix = 'users'
 c3po_quotes_filename = 'c3po_quotes'
+
 description = '''C-3PO has been modernized to interface with contemporary chat software like Discord.'''
 bot = commands.Bot(command_prefix='!', description=description)
 client = discord.Client()
 
+######
+# Events
+######
 @bot.event
 async def on_ready():
     print('Logged in as')
     print(bot.user.name)
     print(bot.user.id)
     print('------')
+
+# Deletes posts in specified channel that are just URLs
+# @bot.event
+# async def on_message(message):
+    # print(message)
 
 ######
 # Names
@@ -27,7 +39,7 @@ async def names(ctx):
 @names.group(pass_context=True, description='Chooses who takes home the prize')
 async def choose(ctx):
     """Select at random from the list of names"""
-    filename = get_rolls_filename(ctx.message.server.id)
+    filename = get_data_file(ctx.message.server.id, ext.ROLLS.value)
 
     winner = get_random_from_file(filename)
     await bot.say("The winner is " + winner)
@@ -37,7 +49,7 @@ async def choose(ctx):
 @names.group(pass_context=True,description='Adds any number of users to the list of names, separated by a space')
 async def add(ctx, *users : str):
     """Add users to the list"""
-    filename = get_rolls_filename(ctx.message.server.id)
+    filename = get_data_file(ctx.message.server.id, ext.ROLLS.value)
 
     with open(filename, 'r') as file:
         lines = file.read().splitlines()
@@ -59,7 +71,7 @@ async def add(ctx, *users : str):
 @names.group(pass_context=True,description='Removes one users from the list of already added names')
 async def remove(ctx, user : str):
     """Removes a user"""
-    filename = get_rolls_filename(ctx.message.server.id)
+    filename = get_data_file(ctx.message.server.id, ext.ROLLS.value)
 
     lines = open(filename, 'r').readlines()
     
@@ -77,7 +89,7 @@ async def remove(ctx, user : str):
 @names.group(pass_context=True,description='Clears the list of all currently added names')
 async def clear(ctx):
     """Clears the list"""
-    filename = get_rolls_filename(ctx.message.server.id)
+    filename = get_data_file(ctx.message.server.id, ext.ROLLS.value)
     
     file = open(filename, 'w')
     file.seek(0)
@@ -88,21 +100,22 @@ async def clear(ctx):
 @names.group(pass_context=True,description='Lists all names added')
 async def show(ctx):
     """Lists all names added"""
-    filename = get_rolls_filename(ctx.message.server.id)
+    filename = get_data_file(ctx.message.server.id, ext.ROLLS.value)
 
     lines = open(filename, 'r').readlines()
     users = ''.join('{}'.format(k) for k in lines)
     await bot.say("Current user list:\n" + users)
 
 
+
+######
+# Other commands
+######
 @bot.command(description='For when you really need that bit of robot in your life')
 async def quote():
     """Says a quote"""
     await bot.say(get_random_from_file(c3po_quotes_filename))
 
-######
-# Other commands
-######
 @bot.command(description='For when you wanna settle the score some other way')
 async def choose(ctx, *choices: str):
     """Chooses from a list"""
@@ -151,8 +164,8 @@ def get_random_from_file(filename : str):
     return secure_random.choice(lines)
 
 # Returns filename to save added roll names, check for file and creates if it doesn't exist
-def get_rolls_filename(server_id : str):
-    filename = server_id + '.' + loot_rolls_suffix
+def get_data_file(server_id : str, extension : ext):
+    filename = server_id + '.' + extension
     if not does_file_exists(filename):
         create_file(filename)
         # await bot.say("There was no file meaning you hadn't added any names.  Do that first please!\n" + get_random_from_file(c3po_quotes_filename))
