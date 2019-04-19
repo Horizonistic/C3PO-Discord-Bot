@@ -55,11 +55,15 @@ class Moderation(commands.Cog):
                         # Iterate over all lines of message
                         for line in message_lines:
                             if not regex.match(line.strip()):
-                                print(line)
                                 # Invalid shift code!
                                 pm_content = "Your message _\"{0}\"_ was removed from the channel _{1}_ because it contained one or more invalid shift code.".format(message.content, message.channel.name)
                                 await message.delete()
                                 await message.author.send(content=pm_content)
+
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        if isinstance(error, commands.MissingPermissions):
+            await ctx.author.send("You don't have the permissions to run the command _{0}_ on the server _{1}_.  You need the Manage Messages permission.".format(ctx.message.content, ctx.guild.name))
 
     @commands.command(pass_context=True,description='Lists all names added')
     @commands.has_permissions(manage_messages=True)

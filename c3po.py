@@ -17,7 +17,6 @@ bot.load_extension("cogs.random_selection")
 bot.load_extension("cogs.other")
 
 # todo: make a way to check if channel is moderated
-# todo: regex for channel moderations
 # todo: make a list of cog names (e.g. "cogs.randomselection") to !reloadall easily
 # todo: use databases instead of files to save settings (maybe in the future)
 
